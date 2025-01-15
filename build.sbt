@@ -6,3 +6,17 @@ lazy val root = (project in file("."))
   .settings(
     name := "cats-course"
   )
+
+scalacOptions ++= Seq(
+  "-language:higherKinds",
+  "-Ypartial-unification",
+  "-language:higherKinds"
+)
+
+scalacOptions += "-Ypartial-unification"
+
+val catsVersion = "2.12.0"
+
+libraryDependencies ++= Seq(
+  "org.typelevel" %% "cats-core" % catsVersion,
+)
