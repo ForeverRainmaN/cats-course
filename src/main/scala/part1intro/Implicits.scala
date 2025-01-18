@@ -24,8 +24,9 @@ object Implicits {
   // implicit arguments and values
   def increment(x: Int)(implicit amount: Int) = x + amount
 
-  implicit val defaultAmount: Int = 10
   val incremented2 = increment(2)
+  
+  implicit val defaultAmount: Int = 10
 
   def multiply(x: Int)(implicit times: Int) = x * times
 
