@@ -1,6 +1,6 @@
 package part1intro
 
-object TypeClasses {
+object TypeClasses extends App {
 
   case class Person(name: String, age: Int)
 
@@ -29,14 +29,19 @@ object TypeClasses {
   def convertListToJson[T](list: List[T])(implicit serializer: JSONSerializer[T]): String =
     list.map(v => serializer.toJson(v)).mkString("[", ",", "]")
 
-  def main(args: Array[String]): Unit = {
-      println(convertListToJson(List(Person("Alice", 23), Person("Xavier", 45))))
-  }
 
   // part 4 - extending the existing types via extension methods
   object JSONSyntax {
     implicit class JSONSerializable[T](value: T)(implicit serializer: JSONSerializer[T]) {
       def toJson: String = serializer.toJson(value)
     }
+  }
+
+
+  def main(args: Array[String]): Unit = {
+    println(convertListToJson(List(Person("Alice", 23), Person("Xavier", 45))))
+    val bob = Person("Bob", 35)
+    import JSONSyntax._
+    println(bob.toJson) // comes from an implicit conversion via typeclass
   }
 }

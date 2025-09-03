@@ -2,13 +2,12 @@ package part1intro
 
 object CatsIntro {
   // part 1 - type class import
-
+  
   import cats.Eq
 
   // part2
   import cats.instances.int.*
-
-
+  
   // part  3 - use the TC API
 
   val intEquality = Eq[Int]
