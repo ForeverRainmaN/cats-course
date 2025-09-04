@@ -38,10 +38,10 @@ object TypeClasses extends App {
   }
 
 
-  def main(args: Array[String]): Unit = {
-    println(convertListToJson(List(Person("Alice", 23), Person("Xavier", 45))))
-    val bob = Person("Bob", 35)
-    import JSONSyntax._
-    println(bob.toJson) // comes from an implicit conversion via typeclass
-  }
+//  def main(args: Array[String]): Unit = {
+//    println(convertListToJson(List(Person("Alice", 23), Person("Xavier", 45))))
+//    val bob = Person("Bob", 35)
+//    import JSONSyntax._
+//    println(bob.toJson) // comes from an implicit conversion via typeclass
+//  }
 }

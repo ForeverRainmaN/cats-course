@@ -6,8 +6,8 @@ object CatsIntro {
   import cats.Eq
 
   // part2
-  import cats.instances.int.*
-  
+  import cats.instances.int._
+
   // part  3 - use the TC API
 
   val intEquality = Eq[Int]

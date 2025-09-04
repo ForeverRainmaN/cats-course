@@ -2,18 +2,22 @@ package part1intro
 
 import cats.implicits.catsSyntaxEq
 
-
 object TCVariance {
 
-  val aComparison = Option(2) == Option(3)
+  2 === 4
 
-  // val invalidComparison = Some(2) === None // Eq[Some[Int]] not found
+  val aComparison = Option(2) === Option(3)
+
+   val anotherComparison = Option("str") === Option("asd")
+
+  //  val invalidComparison = Some(2) === None // Eq[Some[Int]] not found
+
   // variance
   class Animal
 
   class Cat extends Animal
 
-  // covariant type: sybtyping is propagated to the generic type
+  // covariant type: subtyping is propagated to the generic type
   class Cage[+T]
 
   val cage: Cage[Animal] = new Cage[Cat] // Cat <: Animal, so Cage[Cat] <: Cage[Animal]
