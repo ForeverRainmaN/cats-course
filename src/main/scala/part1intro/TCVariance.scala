@@ -1,14 +1,14 @@
 package part1intro
 
-import cats.implicits.catsSyntaxEq
+import cats.instances.int.*
+import cats.instances.option.*
+import cats.syntax.eq.*
 
 object TCVariance {
 
   2 === 4
 
   val aComparison = Option(2) === Option(3)
-
-   val anotherComparison = Option("str") === Option("asd")
 
   //  val invalidComparison = Some(2) === None // Eq[Some[Int]] not found
 
@@ -40,14 +40,13 @@ object TCVariance {
 
   makeSound[Animal] // ok - TC instance defined above
   makeSound[Cat] // ok - TC instance for Animal is also applicable to Cats
-  // rule1: contravariant TCs can uuse the superclass instances if nothing is available strictly for that type
+  // rule1: contravariant TCs can use the superclass instances if nothing is available strictly for that type
 
   // has implications for subtypes
   implicit object OptionSoundMaker extends SoundMaker[Option[Int]]
 
   makeSound[Option[Int]]
   makeSound[Some[Int]]
-
 
   // covariant TC
   trait AnimalShow[+T] {
