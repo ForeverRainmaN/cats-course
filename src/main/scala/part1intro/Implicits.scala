@@ -49,13 +49,10 @@ object Implicits {
   // implicit argument is used to PROVE THE EXISTENCE of a type
 
   // implicit methods
-  implicit def oneArgCaseClassSerializer[T <: Product]: JSONSerializer[T] = new JSONSerializer[T] {
-
-    override def toJson(value: T): String =
-      s"""
-         |{"${value.productElementName(0)}" : "${value.productElement(0)}}
-         |""".stripMargin
-  }
+  implicit def oneArgCaseClassSerializer[T <: Product]: JSONSerializer[T] = (value: T) =>
+    s"""
+       |{"${value.productElementName(0)}" : "${value.productElement(0)}}
+       |""".stripMargin
 
   // implicit methods can be used as conversion
 
