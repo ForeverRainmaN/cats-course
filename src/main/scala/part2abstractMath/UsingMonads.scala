@@ -22,7 +22,7 @@ object UsingMonads {
 
   val loadingMonad = Monad[LoadingOr]
   val anEither = loadingMonad.pure(45) // LoadingOr[Int] == Right(45)
-  val aChangedLoading = loadingMonad.flatMap(anEither)(x => if (x % 2 == 0) Right(n + 1) else Left("Loading meaning of life..."))
+  val aChangedLoading = loadingMonad.flatMap(anEither)(x => if (x % 2 == 0) Right(x + 1) else Left("Loading meaning of life..."))
 
   case class OrderStatus(orderId: Long, status: String)
 
