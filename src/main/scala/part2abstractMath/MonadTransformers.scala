@@ -25,7 +25,7 @@ object MonadTransformers {
 
   val listOfEithers: EitherT[List, String, Int] = EitherT(List(Left("something wrong"), Right(43), Right(2)))
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
-  val futureOfEither: EitherT[Future, String, Int] = EitherT(Future(Right(45)))
+  val futureOfEither: EitherT[Future, String, Int] = EitherT.right(Future(45))
 
   val bandwidths = Map(
     "server1.rockthejvm.com" -> 50,
@@ -36,27 +36,28 @@ object MonadTransformers {
   type AsyncResponse[T] = EitherT[Future, String, T]
 
   def getBandwidth(server: String): AsyncResponse[Int] = bandwidths.get(server) match {
-    case None => EitherT(Future(Left("Server unreachable")))
-    case Some(v) => EitherT(Future(Right(v)))
+    case None => EitherT.left(Future(s"Server $server unreachable"))
+    case Some(v) => EitherT.right(Future(v))
   }
 
-  def canWithstandSurge(s1: String, s2: String): AsyncResponse[Boolean] = {
-    val bandwidthSum = for {
-      first <- getBandwidth(s1)
-      second <- getBandwidth(s2)
-    } yield first + second
-
-    bandwidthSum.flatMap(x => if x > 250 then EitherT[Future, String, Boolean](Future(Right(true))) else EitherT(Future(Left("Unavailable"))))
-  }
+  def canWithstandSurge(s1: String, s2: String): AsyncResponse[Boolean] = for {
+    first <- getBandwidth(s1)
+    second <- getBandwidth(s2)
+  } yield first + second > 250
+  // Future[Either[String, Boolean]]
 
   def generateTrafficSpikeReport(s1: String, s2: String): AsyncResponse[String] = {
     canWithstandSurge(s1, s2).transform[String, String] {
-      case Left(value) => Left("huynya")
-      case Right(value) => Right("Huynya2")
+      case Left(reason) => Left(s"Servers $s1 and $s2 CANNOT cope with the incoming spike: not enough total bandwidth: $reason")
+      case Right(false) => Left(s"Servers $s1 and $s2 CANNOT cope with the incoming spike: not enough total bandwidth")
+      case Right(true) => Right(s"Servers $s1 and $s2 can cope with the incoming spike no problem!")
     }
   }
 
   def main(args: Array[String]): Unit = {
-    println(listOfTuples.value)
+    val futureResult: Future[Either[String, String]] =
+      generateTrafficSpikeReport("server2.rockthejvm.com", "server3.rockthejvm.com").value
+
+    futureResult.foreach(println)
   }
 }
