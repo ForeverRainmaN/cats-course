@@ -25,7 +25,7 @@ object MonadTransformers {
 
   val listOfEithers: EitherT[List, String, Int] = EitherT(List(Left("something wrong"), Right(43), Right(2)))
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
-  val futureOfEither: EitherT[Future, String, Int] = EitherT.right(Future(45))
+  val futureOfEither: EitherT[Future, String, Int] = EitherT.right(Future(45)) // wrap Future(Right(45))
 
   val bandwidths = Map(
     "server1.rockthejvm.com" -> 50,
@@ -47,6 +47,7 @@ object MonadTransformers {
   // Future[Either[String, Boolean]]
 
   def generateTrafficSpikeReport(s1: String, s2: String): AsyncResponse[String] = {
+    // change the deeply nested Either
     canWithstandSurge(s1, s2).transform[String, String] {
       case Left(reason) => Left(s"Servers $s1 and $s2 CANNOT cope with the incoming spike: not enough total bandwidth: $reason")
       case Right(false) => Left(s"Servers $s1 and $s2 CANNOT cope with the incoming spike: not enough total bandwidth")
