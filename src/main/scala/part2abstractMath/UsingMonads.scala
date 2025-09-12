@@ -11,7 +11,6 @@ object UsingMonads {
 
   val aSimpleList = monadList.pure(2)
   val anExtendedList = monadList.flatMap(aSimpleList)(x => List(x, x + 1))
-
   // either is also a monad
   val aManualEither: Either[String, Int] = Right(42)
 
