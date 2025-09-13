@@ -54,17 +54,27 @@ object Writers {
     }
   }
 
-  //
-//  def writerSum(n: Int): Writer[Vector[String], Int] = {
-//    if(n <= 0) Writer(Vector(), 0)
-//    else {
-//    }
-//  }
+  def writerSum(n: Int): Writer[Vector[String], Int] = {
+    if (n <= 0) Writer(Vector(), 0)
+    else writerSum(n - 1)
+      .mapWritten(_ :+ s"Now at $n")
+      .map(v => v + n)
+      .flatMap { v => Writer(Vector(s"Computed sum ($n) = $v"), v)
+      }
+  }
 
+  def sumWithLogs(n: Int): Writer[Vector[String], Int] = {
+    if (n <= 0) Writer(Vector(), 0)
+    else for {
+      _ <- Writer(Vector(s"Now at $n"), n)
+      lowerSum <- sumWithLogs(n - 1)
+      _ <- Writer(Vector(s"Computed sum (${n - 1}) = $lowerSum"), n)
+    } yield lowerSum + n
+  }
 
   def main(args: Array[String]): Unit = {
     //    println(compositeWriter.run)
     val (l, v) = countAndLog(10).run
-    println(naiveSum(10))
+    println(writerSum(10))
   }
 }
