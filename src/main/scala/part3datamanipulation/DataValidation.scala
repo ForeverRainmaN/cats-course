@@ -3,6 +3,7 @@ package part3datamanipulation
 import cats.Semigroup
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 object DataValidation {
 
@@ -61,6 +62,52 @@ object DataValidation {
       go(3)
     }
   }
+
+  aValidValue.andThen(_ => anInvalidValue)
+  // test a valid value with ensure
+  aValidValue.ensure(List("Something went wrong"))(_ % 2 == 0)
+  // transform
+  aValidValue.map(_ + 1)
+  aValidValue.leftMap(_.length)
+  aValidValue.bimap(_.length, _ + 1)
+  // interoperate with stdlib
+  val eitherToValidated: Validated[List[String], Int] = Validated.fromEither(Right(42))
+  val optionToValidated: Validated[List[String], Int] = Validated.fromOption(None, List("Nothing present here"))
+  val tryToValidated: Validated[Throwable, Int] = Validated.fromTry(Try("Something".toInt))
+  // backwards
+  aValidValue.toOption
+  aValidValue.toEither
+
+  object FormValidation {
+
+    import cats.data.Validated
+
+    type FormValidation[T] = Validated[List[String], T]
+
+    def getValue(form: Map[String, String], fieldName: String): FormValidation[String] =
+      Validated.fromOption(form.get(fieldName), List(s"the field $fieldName must be specified."))
+
+    def nonBlank(value: String, fieldName: String): FormValidation[String] =
+      Validated.cond(value.nonEmpty, value, List(s"The field $fieldName must not be blank"))
+
+    def emailProperForm(email: String): FormValidation[String] =
+      Validated.cond(email.contains("@"), email, List("Email is invalid"))
+
+    def passwordCheck(password: String): FormValidation[String] =
+      Validated.cond(password.length >= 10, password, List("Passwords must be at least 10 characters long."))
+
+    def validateForm(form: Map[String, String]): FormValidation[String] = {
+      getValue(form, "Name").andThen(name => nonBlank(name, "Name"))
+        .combine(getValue(form, "Email").andThen(emailProperForm))
+        .combine(getValue(form, "Password").andThen(passwordCheck))
+        .map(_ => "User registration complete")
+    }
+  }
+
+  import cats.syntax.validated.*
+
+  val anInvalidMeaningOfLife: Validated[List[String], Int] = 42.valid[List[String]]
+  val anError: Validated[String, Int] = "Something went wrong".invalid[Int]
 
   def main(args: Array[String]): Unit = {
     println(testNumber(10))
