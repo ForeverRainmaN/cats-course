@@ -1,15 +1,22 @@
 package part4typeclasses
 
-import cats.{ApplicativeError, Monad}
+import cats.{Applicative, ApplicativeError, Monad}
 
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 object HandlingErrors {
-
-  trait MyMonadError[M[_], E] extends Monad[M] {
+  trait MyApplicativeError[M[_], E] extends Applicative[M] {
     def raiseError[A](e: E): M[A]
+
+    def handleErrorWith[A](ma: M[A])(func: E => M[A]): M[A]
+
+    def handleError[A](ma: M[A])(func: E => A): M[A] = handleErrorWith(ma)(e => pure(func(e)))
+  }
+
+  trait MyMonadError[M[_], E] extends MyApplicativeError[M, E], Monad[M] {
+    def ensure[A](ma: M[A])(e: E)(predicate: A => Boolean): M[A]
   }
 
   import cats.MonadError // implicit MonadError
@@ -30,7 +37,7 @@ object HandlingErrors {
     case _ => Left("Something else") // ErrorOr[Int]
   }
 
-  type Test = Either[*, String]
+  //  type Test = Either[*, String]
   // "filter"
   val filteredSuccess = monadErrorEither.ensure(success)("Number to small")(_ > 100)
 
@@ -54,6 +61,21 @@ object HandlingErrors {
   type ErrorsOr[T] = Validated[List[String], T]
   val appErrorVal = ApplicativeError[ErrorsOr, List[String]]
   // pure, raiseError, handleError, handleErrorWith
+
+  // extension methods
+
+  import cats.syntax.applicative.*
+  import cats.syntax.applicativeError.* // raiseError, handleError, handleErrorWith
+
+  val extendedSuccess = 42.pure[ErrorsOr] // requires implicit ApplicativeError[ErrorsOr, List[String]]
+  val extendedError = List("Badness").raiseError[ErrorsOr, Int]
+  val recoveredError: ErrorsOr[Int] = extendedError.recover {
+    case _ => 43
+  }
+
+  import cats.syntax.monadError.*
+
+  val testedSuccess = success.ensure("Something bad")(_ > 100)
 
   def main(args: Array[String]): Unit = {
 
