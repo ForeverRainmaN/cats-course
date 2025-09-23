@@ -3,10 +3,6 @@
   <component name="ScalaCompilerConfiguration">
     <profile name="sbt 1" modules="cats-course">
       <option name="higherKinds" value="true" />
-      <parameters>
-        <parameter value="-Ypartial-unification" />
-        <parameter value="-Ypartial-unification" />
-      </parameters>
     </profile>
   </component>
 </project>
