@@ -1,5 +1,7 @@
 package part5alien
 
+import cats.data.Reader
+
 object Kleislis {
 
   val func1: Int => Option[String] = x => if (x % 2 == 0) Some(s"$x is even") else None
@@ -19,7 +21,21 @@ object Kleislis {
 
   // convenience
   val multiply = func2K.map(_ * 2)
-  val chain = func2K.flatMap(_ => func1K)
+  val chain = func2K.flatMap(x => func1K)
 
-  
+  import cats.Id
+  // InterestingKleisli == Reader
+  type InterestingKleisli[A, B] = Kleisli[Id, A, B] // Wrapper over A => Id[B]
+  val times2 = Reader[Int, Int](x => x * 2)
+  val plus4 = Reader[Int, Int](y => y + 4)
+  val composed = times2.flatMap(t2 => plus4.map(p4 => t2 + p4))
+
+  val composedFor = for {
+    t2 <- times2
+    t4 <- plus4
+  } yield t2 + t4
+
+  def main(args: Array[String]): Unit = {
+    println(composedFor(3)) // 13
+  }
 }
